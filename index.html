@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Juego de Recoger Frutas</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div id="loading-screen" class="loading-screen">
+        <div class="spinner"></div>
+        <p>Cargando assets...</p>
+    </div>
+
+    <div id="game-container" class="game-container hidden">
+        <div class="game-hud">
+            <div class="score-display">PUNTOS: <span id="score">0</span></div>
+            <div class="lives-display">VIDAS: <span id="lives">3</span></div>
+            <div class="high-score-indicator hidden">MEJOR PUNT.: <span id="high-score">0</span></div>
+        </div>
+
+        <div id="game-area">
+            <div id="basket"></div>
+            <button id="pause-button" class="game-button">PAUSA</button>
+        </div>
+
+        <div id="mobile-controls" class="game-controls">
+            <button id="mobile-left-button" class="mobile-button">&lt;</button>
+            <button id="mobile-right-button" class="mobile-button">&gt;</button>
+        </div>
+
+        </div> <script src="script.js"></script>
+</body>
+</html>

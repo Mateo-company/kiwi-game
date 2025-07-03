@@ -1,0 +1,575 @@
+/* Fuente global */
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+body {
+    margin: 0;
+    overflow: hidden; /* Esto es clave para que nada se escape del viewport */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: #222;
+    font-family: 'Press Start 2P', cursive;
+    color: #eee;
+    text-shadow: 2px 2px #000;
+}
+
+/* Contenedor principal del juego */
+.game-container {
+    position: relative;
+    width: 90%; /* Ajuste: Permite que el contenedor sea responsivo, ocupando el 90% del ancho disponible */
+    max-width: 460px; /* Ajuste: Pero no más de 460px de ancho */
+    height: 640px; /* Alto fijo del "teléfono" del juego */
+    background-color: #333;
+    border: 5px solid #555;
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0, 255, 0, 0.5);
+    overflow: hidden; /* ¡Esencial para que el contenido se mantenga dentro de sus límites! */
+    display: flex;
+    flex-direction: column;
+}
+
+/* HUD (Score, Lives, High Score) */
+.game-hud {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    background-color: #1a1a1a;
+    font-size: 0.8em;
+    border-bottom: 2px solid #555;
+    z-index: 101;
+}
+
+.score-display, .lives-display, .high-score-indicator {
+    padding: 5px 10px;
+    background-color: #000;
+    border-radius: 5px;
+    border: 1px solid #444;
+}
+
+/* Área de juego */
+.game-area {
+    position: relative;
+    flex-grow: 1; /* Ocupa todo el espacio vertical restante */
+    background-color: #4a674d;
+    overflow: hidden; /* ¡Esencial: Las frutas y la canasta se mantienen dentro de esta área! */
+    padding-bottom: 5px; /* Un pequeño espacio en la parte inferior para la canasta */
+    /* border: 2px dashed red; */ /* <-- ¡COMENTADO/ELIMINADO: Borde de depuración! */
+}
+
+/* Botón de pausa */
+.game-button {
+    background-color: #4CAF50;
+    color: white;
+    padding: 12px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: 'Press Start 2P', cursive;
+    font-size: 0.8em;
+    text-transform: uppercase;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+    border: 2px solid #2e8b57;
+    box-shadow: 3px 3px 5px rgba(0,0,0,0.3);
+    position: absolute;
+    top: 50%;
+    left: 20px;
+    transform: translateY(-50%);
+    z-index: 102;
+    margin-top: 0;
+}
+
+.game-button:hover {
+    background-color: #45a049;
+    transform: translateY(-50%) scale(1.05);
+}
+
+.game-button:active {
+    background-color: #3e8e41;
+    transform: translateY(-50%) scale(0.95);
+}
+
+/* Cesta */
+.basket {
+    position: absolute;
+    width: 80px; /* Ancho por defecto, se ajusta con JS */
+    height: 60px; /* Alto por defecto, se ajusta con JS */
+    background-image: url('assets/images/canasta.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    transition: left 0.05s linear;
+    z-index: 10;
+    margin: 0;
+    padding: 0;
+}
+
+/* Frutas */
+.fruit {
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    background-size: cover;
+    background-repeat: no-repeat;
+    z-index: 5;
+    pointer-events: none;
+    margin: 0;
+    padding: 0;
+}
+
+/* Imágenes de frutas - Nombres de clase y rutas estandarizadas */
+.apple { background-image: url('assets/images/apple.png'); }
+.orange { background-image: url('assets/images/orange.png'); }
+.apple-mala { background-image: url('assets/images/apple-mala.png'); }
+.cherry-berry { background-image: url('assets/images/cherry_berry.png'); }
+
+/* Efecto de explosión */
+.explosion-effect {
+    position: absolute;
+    width: 40px;
+    height: 40px;
+    background-image: url('assets/images/explosion.png');
+    background-size: cover;
+    animation: explode 0.5s forwards;
+    pointer-events: none;
+    z-index: 15;
+}
+
+@keyframes explode {
+    0% { transform: scale(0.5); opacity: 1; }
+    100% { transform: scale(1.5); opacity: 0; }
+}
+
+/* --- Estilos de Menús Globales --- */
+.menu {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.9);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 20px;
+    box-sizing: border-box;
+    z-index: 100;
+}
+
+.menu h1 {
+    font-size: 2em;
+    margin-bottom: 30px;
+    color: #4CAF50;
+    text-shadow: 4px 4px #000;
+}
+
+.menu h2 {
+    font-size: 1.5em;
+    margin-bottom: 20px;
+    color: #fff;
+    text-shadow: 3px 3px #000;
+}
+
+.menu-button, .back-button {
+    background-color: #007BFF;
+    color: white;
+    padding: 12px 25px;
+    margin: 10px 0;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: 'Press Start 2P', cursive;
+    font-size: 0.9em;
+    text-transform: uppercase;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+    border: 2px solid #0056b3;
+    width: 80%;
+    max-width: 250px;
+}
+
+.menu-button:hover, .back-button:hover {
+    background-color: #0056b3;
+    transform: translateY(-3px);
+}
+
+.menu-button:active, .back-button:active {
+    background-color: #004085;
+    transform: translateY(0);
+}
+
+.back-button {
+    background-color: #6c757d;
+    border-color: #5a6268;
+    margin-top: 20px;
+}
+
+.back-button:hover {
+    background-color: #5a6268;
+}
+
+/* Elemento oculto */
+.hidden {
+    display: none !important;
+}
+
+/* --- Pantalla de Carga --- */
+.loading-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #1a1a1a;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 999;
+    transition: opacity 1s ease-out;
+    font-size: 1.2em;
+}
+
+.spinner {
+    border: 8px solid rgba(255, 255, 255, 0.3);
+    border-top: 8px solid #4CAF50;
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    animation: spin 1s linear infinite;
+    margin-bottom: 20px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* --- Estilos del Menú de Opciones y Modo Personalizado --- */
+.setting-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 15px 0;
+    width: 80%;
+    max-width: 300px;
+}
+
+.setting-item label {
+    margin-bottom: 8px;
+    font-size: 0.85em;
+    color: #fff;
+}
+
+.setting-item input[type="range"],
+.setting-item select,
+.setting-item input[type="number"] {
+    width: 100%;
+    -webkit-appearance: none;
+    background: transparent;
+    margin: 0;
+}
+
+/* Estilo para sliders (input type="range") */
+.setting-item input[type="range"]::-webkit-slider-runnable-track {
+    width: 100%;
+    height: 8px;
+    cursor: pointer;
+    background: #555;
+    border-radius: 5px;
+    border: 1px solid #777;
+}
+
+.setting-item input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    border: 2px solid #eee;
+    height: 20px;
+    width: 20px;
+    border-radius: 50%;
+    background: #4CAF50;
+    cursor: pointer;
+    margin-top: -7px;
+    box-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+}
+
+.setting-item input[type="range"]:focus::-webkit-slider-runnable-track {
+    background: #666;
+}
+
+/* Firefox specific styles for range input */
+.setting-item input[type="range"]::-moz-range-track {
+    width: 100%;
+    height: 8px;
+    cursor: pointer;
+    background: #555;
+    border-radius: 5px;
+    border: 1px solid #777;
+}
+.setting-item input[type="range"]::-moz-range-thumb {
+    border: 2px solid #eee;
+    height: 20px;
+    width: 20px;
+    border-radius: 50%;
+    background: #4CAF50;
+    cursor: pointer;
+    box-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+}
+
+
+.slider-value {
+    margin-top: 5px;
+    font-size: 0.75em;
+    color: #bbb;
+}
+
+/* Estilo para select y number inputs */
+.setting-item select,
+.setting-item input[type="number"] {
+    padding: 8px;
+    border-radius: 5px;
+    border: 1px solid #777;
+    background-color: #333;
+    color: #eee;
+    font-family: 'Press Start 2P', cursive;
+    font-size: 0.8em;
+    text-align: center;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+}
+
+/* --- Estilos de Puntuaciones Altas --- */
+#high-scores-list {
+    list-style: none;
+    padding: 0;
+    width: 80%;
+    max-width: 300px;
+    margin-top: 20px;
+    background-color: #2a2a2a;
+    border-radius: 8px;
+    border: 2px solid #555;
+    font-size: 0.8em;
+}
+
+#high-scores-list li {
+    padding: 10px 15px;
+    border-bottom: 1px dashed #444;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#high-scores-list li:last-child {
+    border-bottom: none;
+}
+
+#high-scores-list li span {
+    font-weight: bold;
+    color: #4CAF50;
+    margin-right: 10px;
+}
+
+/* --- Estilos de Calificación --- */
+.stars-container {
+    display: flex;
+    margin: 20px 0;
+    cursor: pointer;
+}
+
+.stars-container .star {
+    font-size: 2.5em;
+    color: #555;
+    transition: color 0.2s ease, transform 0.1s ease;
+}
+
+.stars-container .star:hover {
+    color: #ffc107;
+    transform: scale(1.1);
+}
+
+.stars-container .star.active {
+    color: #ffc107;
+    text-shadow: 0 0 10px #ffc107;
+}
+
+#rating-message {
+    margin-top: 10px;
+    font-size: 0.9em;
+    color: #bbb;
+}
+
+/* --- Estilos de Sugerencias --- */
+#suggestion-form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 90%;
+    max-width: 350px;
+}
+
+#suggestion-text {
+    width: 100%;
+    height: 120px;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    border: 1px solid #777;
+    background-color: #333;
+    color: #eee;
+    font-family: Arial, sans-serif;
+    font-size: 0.9em;
+    resize: vertical;
+    box-sizing: border-box;
+}
+
+#suggestion-text::placeholder {
+    color: #aaa;
+}
+
+.char-count {
+    font-size: 0.7em;
+    color: #bbb;
+    align-self: flex-end;
+    margin-bottom: 15px;
+}
+
+/* --- Pantalla de Game Over --- */
+.game-over-screen .score-save-section {
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.game-over-screen .score-save-section label {
+    margin-bottom: 10px;
+    font-size: 0.9em;
+}
+
+.game-over-screen .score-save-section input[type="text"] {
+    width: 100px;
+    padding: 10px;
+    margin-bottom: 15px;
+    border-radius: 5px;
+    border: 1px solid #777;
+    background-color: #333;
+    color: #eee;
+    font-family: 'Press Start 2P', cursive;
+    font-size: 1.2em;
+    text-align: center;
+    text-transform: uppercase;
+}
+
+/* --- Controles Móviles (Botones) --- */
+.game-controls {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    padding: 10px;
+    box-sizing: border-box;
+    background-color: #1a1a1a;
+    border-top: 2px solid #555;
+}
+
+.mobile-button {
+    flex: 1;
+    background-color: #007BFF;
+    color: white;
+    padding: 20px 0;
+    margin: 0 5px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: 'Press Start 2P', cursive;
+    font-size: 1.5em;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+    border: 2px solid #0056b3;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+}
+
+.mobile-button:hover {
+    background-color: #0056b3;
+    transform: scale(1.05);
+}
+
+.mobile-button:active {
+    background-color: #004085;
+    transform: scale(0.95);
+}
+
+/* Ocultar controles móviles por defecto y mostrarlos en pantallas táctiles */
+@media (hover: hover) {
+    #mobile-controls {
+        display: none;
+    }
+}
+
+/* Ajustes para pantallas pequeñas (móviles) */
+@media (max-width: 600px) {
+    .game-container {
+        width: 100vw; /* Ocupa todo el ancho del viewport en móviles */
+        height: 100vh; /* Ocupa todo el alto del viewport en móviles */
+        border-radius: 0;
+    }
+    .menu-button, .back-button {
+        width: 90%;
+    }
+    .game-hud {
+        font-size: 0.7em;
+        padding: 8px;
+    }
+    /* Ajustes específicos para el botón de pausa en móviles */
+    .game-button {
+        left: 10px;
+        top: 10px;
+        transform: translateY(0);
+        padding: 8px 15px;
+        font-size: 0.7em;
+        margin-top: 0;
+    }
+}
+
+/* Modos de Juego - descripción */
+.mode-selection {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 80%;
+    max-width: 300px;
+}
+
+.mode-button {
+    position: relative;
+    padding-bottom: 30px;
+}
+
+.mode-button strong {
+    display: block;
+    margin-bottom: 5px;
+    font-size: 1em;
+}
+
+.mode-description {
+    font-size: 0.6em;
+    color: #bbb;
+    position: absolute;
+    bottom: 5px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+    pointer-events: none;
+    white-space: normal;
+}
+
+.mode-description.visible {
+    opacity: 1;
+}
