@@ -1,156 +1,686 @@
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kiwi Game</title>
-     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🥝</text></svg>">
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
-    <!-- Contenedor de notificación -->
-    <div id="game-notification">
-        <p id="game-notification-message"></p>
-    </div>
+/* style.css */
+/* --- ESTILOS GENERALES --- */
+:root {
+    --primary-color: #4CAF50;
+    --secondary-color: #FFC107;
+    --accent-color: #F44336;
+    --text-color: #333;
+    --background-color: #f0f0f0;
+    --button-hover-bg: #45a049;
+    --button-active-bg: #3d8b40;
+    --menu-bg: rgba(255, 255, 255, 0.95);
+    --border-radius: 10px;
+    --box-shadow: 0 6px 12px rgba(0, 0, 0, 0.25);
+    --error-color: #ff4444;
+    --success-color: #00C851;
+    --game-area-bg: #e0f7fa;
+    --notification-bg: rgba(0, 0, 0, 0.85);
+}
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: var(--text-color);
+}
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #2c3e50, #4a6491);
+    overflow: hidden;
+    padding: 20px;
+}
+#game-container {
+    width: 100%;
+    max-width: 500px;
+    height: 90vh;
+    max-height: 800px;
+    position: relative;
+    border: 5px solid var(--primary-color);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    box-shadow: var(--box-shadow);
+    background-color: #fff;
+    animation: changeBorderColor 10s infinite alternate;
+}
+@keyframes changeBorderColor {
+    0% { border-color: #4CAF50; }
+    25% { border-color: #FFC107; }
+    50% { border-color: #F44336; }
+    75% { border-color: #9C27B0; }
+    100% { border-color: #2196F3; }
+}
+.screen {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background: var(--menu-bg);
+    padding: 20px;
+    text-align: center;
+    transition: opacity 0.5s ease-in-out;
+    z-index: 10;
+    animation: fadeIn 0.5s ease-out;
+}
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+.screen.hidden {
+    display: none;
+}
+#game-screen {
+    background: linear-gradient(to bottom, #87CEEB, #F0F8FF);
+    justify-content: flex-start;
+    position: relative;
+    padding: 0;
+}
+#game-area {
+    width: 100%;
+    height: calc(100% - 80px);
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(135deg, #bbdefb 0%, #e3f2fd 100%);
+    border-bottom: 2px solid rgba(0,0,0,0.1);
+}
+#game-area::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: 
+        radial-gradient(circle at 10% 20%, rgba(255, 255, 255, 0.2) 0px, transparent 5px),
+        radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.15) 0px, transparent 8px),
+        radial-gradient(circle at 30% 40%, rgba(255, 255, 255, 0.1) 0px, transparent 10px);
+    background-size: 200px 200px;
+    animation: cloudsAnimation 40s linear infinite;
+    pointer-events: none;
+}
+@keyframes cloudsAnimation {
+    0% {
+        background-position: 0 0, 100px 150px, 200px 300px;
+    }
+    100% {
+        background-position: 500px 0, 600px 150px, 700px 300px;
+    }
+}
+#fruit-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+.game-state--paused {
+    filter: brightness(0.8);
+}
+.game-state--paused::before {
+    content: "PAUSADO";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 3em;
+    color: white;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+    z-index: 20;
+    pointer-events: none;
+}
+.hud {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+    background-color: rgba(0, 0, 0, 0.6);
+    color: white;
+    font-weight: bold;
+    font-size: 1.2em;
+    z-index: 5;
+}
+.hud span {
+    color: white;
+    flex-grow: 1;
+    text-align: center;
+}
+#high-score-indicator {
+    color: var(--secondary-color);
+}
+#pause-button {
+    background: none;
+    border: none;
+    font-size: 1.5em;
+    padding: 0;
+    margin: 0;
+    width: auto;
+    cursor: pointer;
+    color: white;
+}
+#pause-button:hover {
+    transform: scale(1.1);
+    background: none;
+}
+#basket {
+    position: absolute;
+    bottom: 0;
+    width: 80px;
+    height: 60px;
+    background-color: #8B4513;
+    background-image: linear-gradient(to bottom, #A0522D, #8B4513);
+    border-radius: 10px 10px 0 0;
+    transform: translateX(-50%);
+    z-index: 3;
+    box-shadow: 0 -5px 10px rgba(0,0,0,0.2);
+}
+.fruit {
+    position: absolute;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    z-index: 2;
+    pointer-events: auto;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 28px;
+}
+.explosion-effect {
+    position: absolute;
+    width: 50px;
+    height: 50px;
+    background-color: #FF5722;
+    border-radius: 50%;
+    z-index: 4;
+    animation: explode 0.4s forwards;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 0 20px #FF5722;
+}
+@keyframes explode {
+    0% { opacity: 1; transform: scale(0.5); }
+    100% { opacity: 0; transform: scale(1.5); }
+}
+.mobile-controls {
+    position: absolute;
+    bottom: 10px;
+    left: 0;
+    width: 100%;
+    display: flex;
+    justify-content: space-around;
+    padding: 0 20px;
+    z-index: 10;
+}
+.mobile-button {
+    width: 100px;
+    height: 60px;
+    background-color: rgba(0, 0, 0, 0.5);
+    color: white;
+    font-size: 2em;
+    border: 2px solid rgba(255, 255, 255, 0.7);
+    border-radius: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    user-select: none;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    transition: all 0.2s ease;
+}
+.mobile-button:active {
+    background-color: rgba(0, 0, 0, 0.8);
+    transform: scale(0.95);
+}
+/* --- ESTILOS DE MENÚS --- */
+h1, h2 {
+    color: #2E7D32;
+    margin-bottom: 20px;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+}
+h1 {
+    font-size: 3.5em;
+    margin-bottom: 30px;
+    position: relative;
+    animation: titleAnimation 2.5s infinite alternate ease-in-out;
+    letter-spacing: 1px;
+}
+@keyframes titleAnimation {
+    0% { transform: translateY(0) scale(1); text-shadow: 3px 3px 6px rgba(0,0,0,0.2); }
+    50% { transform: translateY(-5px) scale(1.02); text-shadow: 5px 5px 10px rgba(0,0,0,0.25); }
+    100% { transform: translateY(0) scale(1); text-shadow: 3px 3px 6px rgba(0,0,0,0.2); }
+}
+h1::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    width: 100px;
+    height: 4px;
+    background: linear-gradient(to right, #4CAF50, #FFEB3B, #4CAF50);
+    transform: translateX(-50%);
+    border-radius: 2px;
+    animation: titleUnderline 3s infinite ease-in-out;
+}
+@keyframes titleUnderline {
+    0%, 100% { width: 100px; background-position: 0% 50%; }
+    50% { width: 150px; background-position: 100% 50%; }
+}
+h2 {
+    margin-bottom: 25px;
+    position: relative;
+    padding-bottom: 10px;
+}
+h2::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    width: 80px;
+    height: 3px;
+    background: linear-gradient(to right, #4CAF50, #FFEB3B);
+    transform: translateX(-50%);
+    border-radius: 2px;
+}
+button {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 12px 25px;
+    margin: 10px 0;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    font-size: 1.1em;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    width: 250px;
+    max-width: 90%;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    position: relative;
+    overflow: hidden;
+}
+button:hover {
+    background-color: var(--button-hover-bg);
+    transform: translateY(-3px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+button:active {
+    background-color: var(--button-active-bg);
+    transform: translateY(1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+button::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 5px;
+    height: 5px;
+    background: rgba(255, 255, 255, 0.5);
+    opacity: 0;
+    border-radius: 100%;
+    transform: scale(1, 1) translate(-50%);
+    transform-origin: 50% 50%;
+}
+button:focus:not(:active)::after {
+    animation: ripple 0.6s ease-out;
+}
+@keyframes ripple {
+    0% { transform: scale(0, 0); opacity: 1; }
+    100% { transform: scale(50, 50); opacity: 0; }
+}
+.back-button {
+    background-color: #9e9e9e;
+}
+.back-button:hover {
+    background-color: #757575;
+}
+#custom-mode-menu .setting-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 90%;
+    max-width: 350px;
+    margin-bottom: 15px;
+    padding: 10px;
+    background-color: rgba(255, 255, 255, 0.7);
+    border-radius: var(--border-radius);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+#custom-mode-menu label {
+    margin-bottom: 5px;
+    font-weight: bold;
+    font-size: 0.95em;
+    color: var(--text-color);
+}
+#custom-mode-menu input[type="range"],
+#custom-mode-menu input[type="number"],
+#custom-mode-menu select {
+    width: 100%;
+    margin: 5px 0;
+    padding: 8px;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+    background-color: #f9f9f9;
+    transition: border-color 0.3s ease;
+}
+#custom-mode-menu input[type="range"]:focus,
+#custom-mode-menu input[type="number"]:focus,
+#custom-modeMenu select:focus {
+    border-color: var(--primary-color);
+    outline: none;
+}
+#custom-mode-menu span {
+    font-weight: bold;
+    color: var(--primary-color);
+    margin-top: 5px;
+}
+#high-scores-list {
+    list-style: none;
+    padding: 0;
+    margin-top: 20px;
+    width: 90%;
+    max-width: 300px;
+}
+#high-scores-list li {
+    background-color: rgba(255, 255, 255, 0.8);
+    padding: 10px;
+    margin-bottom: 8px;
+    border-radius: 5px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 1.1em;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease;
+}
+#high-scores-list li:hover {
+    transform: translateY(-3px);
+}
+#high-scores-list li span:first-child {
+    font-weight: bold;
+    color: var(--primary-color);
+    margin-right: 10px;
+}
+.stars-container {
+    font-size: 2em;
+    margin-bottom: 20px;
+}
+.star {
+    cursor: pointer;
+    transition: transform 0.2s ease, color 0.2s ease;
+    margin: 0 5px;
+}
+.star:hover {
+    transform: scale(1.2);
+}
+.star.active {
+    color: var(--secondary-color);
+    text-shadow: 0 0 10px var(--secondary-color);
+}
+#rating-message {
+    font-style: italic;
+    color: var(--text-color);
+    min-height: 30px;
+    margin-top: 10px;
+}
+#suggestion-form {
+    display: flex;
+    flex-direction: column;
+    width: 90%;
+    max-width: 400px;
+    margin-bottom: 20px;
+    align-items: center;
+}
+#suggestion-form textarea {
+    width: 100%;
+    height: 120px;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: var(--border-radius);
+    resize: vertical;
+    font-size: 1em;
+    transition: border-color 0.3s ease;
+}
+#suggestion-form textarea:focus {
+    border-color: var(--primary-color);
+    outline: none;
+}
+#suggestion-form button[type="submit"] {
+    width: 100%;
+    max-width: 250px;
+}
+#char-count {
+    align-self: flex-end;
+    font-size: 0.9em;
+    color: #666;
+    margin-bottom: 15px;
+    transition: color 0.3s ease;
+}
+#char-count.low {
+    color: var(--accent-color);
+    font-weight: bold;
+}
+#instructions-menu ul {
+    list-style: none;
+    padding: 0;
+    margin-top: 20px;
+    width: 90%;
+    max-width: 350px;
+    text-align: left;
+}
+#instructions-menu li {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+    font-size: 1.1em;
+    background-color: rgba(255, 255, 255, 0.8);
+    padding: 8px;
+    border-radius: 5px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+#instructions-menu li img {
+    width: 30px;
+    height: 30px;
+    margin-right: 10px;
+    flex-shrink: 0;
+}
+#instructions-menu h3 {
+    margin-top: 20px;
+    margin-bottom: 10px;
+    color: var(--primary-color);
+}
+#game-over-screen input[type="text"] {
+    padding: 10px;
+    margin: 15px 0;
+    border: 1px solid #ddd;
+    border-radius: var(--border-radius);
+    text-align: center;
+    font-size: 1.2em;
+    width: 80%;
+    max-width: 200px;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+#game-over-screen input[type="text"]:focus {
+    border-color: var(--primary-color);
+    outline: none;
+    box-shadow: 0 0 5px rgba(76, 175, 80, 0.5);
+}
+#player-name.invalid {
+    border: 2px solid var(--error-color);
+    animation: shake 0.5s;
+}
+@keyframes shake {
+    0%, 100% {transform: translateX(0);}
+    25% {transform: translateX(-5px);}
+    50% {transform: translateX(5px);}
+    75% {transform: translateX(-5px);}
+    100% {transform: translateX(5px);}
+}
+#final-score {
+    font-size: 1.5em;
+    font-weight: bold;
+    color: var(--accent-color);
+    margin: 5px 0;
+}
+#custom-mode-message {
+    color: var(--accent-color);
+    font-weight: bold;
+    margin: 10px 0;
+    text-align: center;
+    font-size: 1.1em;
+    padding: 10px;
+    background-color: rgba(255, 255, 255, 0.7);
+    border-radius: var(--border-radius);
+    max-width: 90%;
+}
+.name-error {
+    color: var(--error-color);
+    font-size: 0.9em;
+    margin-top: 5px;
+    display: none;
+    font-weight: bold;
+    animation: fadeIn 0.3s ease;
+}
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+#pause-menu {
+    background: rgba(0, 0, 0, 0.85);
+    color: white;
+}
+#pause-menu h2 {
+    margin-bottom: 30px;
+    color: white;
+}
+#pause-menu button {
+    background: var(--primary-color);
+    color: white;
+    width: 200px;
+}
+
+/* Notificación integrada */
+#game-notification {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: var(--notification-bg);
+    color: white;
+    padding: 15px 30px;
+    border-radius: 30px;
+    z-index: 2000;
+    text-align: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+#game-notification.show {
+    opacity: 1;
+}
+#game-notification.success {
+    background-color: rgba(0, 200, 81, 0.9);
+}
+#game-notification.error {
+    background-color: rgba(244, 67, 54, 0.9);
+}
+#game-notification.warning {
+    background-color: rgba(255, 193, 7, 0.9);
+}
+#game-notification-message {
+    margin: 0;
+    font-size: 1.1em;
+}
+
+/* --- RESPONSIVE --- */
+@media (max-width: 600px) {
+    #game-container {
+        height: 100vh;
+        border-radius: 0;
+    }
     
-    <div id="game-container">
-        <div id="loading-screen" class="screen">
-            <h1>Cargando Juego...</h1>
-            <p>Preparando las frutas y la canasta.</p>
-        </div>
-        <div id="main-menu" class="screen hidden">
-            <h1>Kiwi Game</h1>
-            <button id="modes-button">Modos</button>
-            <button id="high-scores-button">Tus puntuaciones</button>
-            <button id="options-button">Opciones</button>
-            <button id="instructions-button">Instrucciones</button>
-            <button id="rate-game-button">Calificar Juego</button>
-            <button id="suggest-feature-button">Sugerir Característica</button>
-        </div>
-        <div id="modes-menu" class="screen hidden">
-            <h2>Selecciona un Modo</h2>
-            <button id="start-game-button">Modo Normal</button>
-            <button id="custom-mode-button-main">Modo Personalizado</button>
-            <button id="back-to-main-from-modes-button" class="back-button">Volver al Menú Principal</button>
-        </div>
-        <div id="game-screen" class="screen hidden">
-            <div id="game-area">
-                <div id="fruit-container"></div>
-                <img id="basket" src="" alt="Canasta">
-            </div>
-            <div class="hud">
-                <span id="score">PUNTOS: 0</span>
-                <span id="lives">VIDAS: 3</span>
-                <span id="high-score-indicator">MEJOR PUNT.: 0</span>
-                <button id="pause-button" class="game-control-button">⏸️</button>
-            </div>
-            <div class="mobile-controls">
-                <button id="mobile-left-button" class="mobile-button">🠸</button>
-                <button id="mobile-right-button" class="mobile-button">🠺</button>
-            </div>
-        </div>
-        <div id="options-menu" class="screen hidden">
-            <h2>Opciones del Juego</h2>
-            <p>Aquí irían opciones como sonido, etc. (no implementadas)</p>
-            <button id="back-to-main-from-options-button" class="back-button">Volver al Menú Principal</button>
-        </div>
-        <div id="custom-mode-menu" class="screen hidden">
-            <h2>Modo Personalizado</h2>
-            <div class="setting-item">
-                <label for="fruit-fall-speed">Velocidad de Caída de Frutas:</label>
-                <input type="range" id="fruit-fall-speed" min="1" max="10" step="0.5" value="3">
-                <span id="fruit-fall-speed-value">3.0</span>
-            </div>
-            <div class="setting-item">
-                <label for="fruit-spawn-rate">Frecuencia de Aparición (ms):</label>
-                <input type="range" id="fruit-spawn-rate" min="500" max="3000" step="100" value="1500">
-                <span id="fruit-spawn-rate-value">1500</span>
-            </div>
-            <div class="setting-item">
-                <label for="max-lives">Vidas Máximas:</label>
-                <input type="number" id="max-lives" min="1" max="10" value="3">
-                <span id="max-lives-value">3</span>
-            </div>
-            <div class="setting-item">
-                <label for="basket-size">Tamaño de la Canasta (px):</label>
-                <input type="range" id="basket-size" min="50" max="150" step="10" value="80">
-                <span id="basket-size-value">80</span>
-            </div>
-            <div class="setting-item">
-                <label for="good-bad-ratio">Proporción Buenas/Malas:</label>
-                <input type="range" id="good-bad-ratio" min="0.1" max="1" step="0.1" value="0.8">
-                <span id="good-bad-ratio-value">80% Buenas</span>
-            </div>
-            <button id="apply-custom-settings-button">Aplicar y Jugar</button>
-            <button id="back-to-modes-from-custom-button" class="back-button">Volver a Modos</button>
-        </div>
-        <div id="high-scores-menu" class="screen hidden">
-            <h2>Tus puntuaciones</h2>
-            <ol id="high-scores-list"></ol>
-            <button id="back-to-main-from-highscores-button" class="back-button">Volver al Menú Principal</button>
-        </div>
-        <div id="rating-menu" class="screen hidden">
-            <h2>Calificar Juego</h2>
-            <div class="stars-container">
-                <span class="star" data-value="1">⭐</span>
-                <span class="star" data-value="2">⭐</span>
-                <span class="star" data-value="3">⭐</span>
-                <span class="star" data-value="4">⭐</span>
-                <span class="star" data-value="5">⭐</span>
-            </div>
-            <p id="rating-message">Haz clic en una estrella para calificar.</p>
-            <button id="back-to-main-from-rating-button" class="back-button">Volver al Menú Principal</button>
-        </div>
-        <div id="suggestion-menu" class="screen hidden">
-            <h2>Sugerir Característica</h2>
-            <form id="suggestion-form" action="https://formspree.io/f/mgvyqwkk" method="POST">
-                <textarea id="suggestion-text" name="suggestion" maxlength="200" placeholder="Escribe tu sugerencia aquí (máx. 200 caracteres)" required></textarea>
-                <p id="char-count">200 caracteres restantes</p>
-                <button type="submit">Enviar Sugerencia</button>
-            </form>
-            <button id="back-to-main-from-suggestion-button" class="back-button">Volver al Menú Principal</button>
-        </div>
-        <div id="instructions-menu" class="screen hidden">
-            <h2>Instrucciones del Juego</h2>
-            <p>¡Atrapa las frutas buenas y evita las malas!</p>
-            <h3>Frutas Buenas (dan puntos):</h3>
-            <ul>
-                <li><img src="assets/images/apple.png" alt="Manzana"> Manzana (+10 Puntos)</li>
-                <li><img src="assets/images/orange.png" alt="Naranja"> Naranja (+15 Puntos)</li>
-                <li><img src="assets/images/cherry_berry.png" alt="Cereza"> Cereza (+20 Puntos)</li>
-                <li><img src="assets/images/kiwi-game.png" alt="Kiwi"> Kiwi (+25 Puntos)</li>
-            </ul>
-            <h3>Frutas Malas (restan vida y puntos):</h3>
-            <ul>
-                <li><img src="assets/images/apple-mala.png" alt="Manzana Podrida"> Manzana Podrida (-15 Puntos, -1 Vida)</li>
-            </ul>
-            <p><strong>Controles:</strong></p>
-            <ul>
-                <li><strong>PC:</strong> Teclas 'A' / 'D' o Flechas Izquierda / Derecha para mover la canasta.</li>
-                <li><strong>Móvil:</strong> Botones de flecha en pantalla.</li>
-            </ul>
-            <button id="back-to-main-from-instructions-button" class="back-button">Volver al Menú Principal</button>
-        </div>
-        <div id="game-over-screen" class="screen hidden">
-            <h2 id="gameOverMessage">GAME OVER</h2>
-            <p>Puntuación Final: <span id="final-score">0</span></p>
-            
-            <div id="custom-mode-message" class="hidden">
-                <p>¡Partida en modo personalizado! Las puntuaciones no se guardan.</p>
-            </div>
-            
-            <div id="save-score-section">
-                <input type="text" id="player-name" placeholder="Tu nombre (2-10 caracteres)" maxlength="10">
-                <p class="name-error">El nombre debe tener entre 2 y 10 caracteres</p>
-                <button id="save-score-button">Guardar Puntuación</button>
-            </div>
-            <button id="restart-game-button">Jugar de Nuevo</button>
-        </div>
-        <div id="pause-menu" class="screen hidden">
-            <h2>Juego en Pausa</h2>
-            <button id="resume-button">Continuar</button>
-            <button id="restart-from-pause-button">Reiniciar</button>
-            <button id="back-to-main-from-pause-button">Menú Principal</button>
-        </div>
-    </div>
-    <script src="script.js"></script>
-</body>
-</html>
+    .screen h1 {
+        font-size: 2em;
+    }
+    
+    .screen h2 {
+        font-size: 1.5em;
+    }
+    
+    button {
+        padding: 10px 20px;
+        font-size: 1em;
+        width: 90%;
+        margin: 5px;
+    }
+    
+    .mobile-controls {
+        bottom: 5px;
+        padding: 0 10px;
+    }
+    
+    .mobile-button {
+        width: 80px;
+        height: 50px;
+        font-size: 1.8em;
+    }
+    
+    #game-area {
+        height: calc(100% - 140px);
+    }
+    
+    .hud {
+        font-size: 1em;
+        padding: 8px 10px;
+    }
+    
+    #pause-button {
+        font-size: 1.2em;
+    }
+    
+    .game-state--paused::before {
+        font-size: 2em;
+    }
+    
+    #game-over-screen input[type="text"] {
+        font-size: 1em;
+        padding: 8px;
+        max-width: 180px;
+    }
+    
+    #game-notification {
+        width: 90%;
+        padding: 12px 20px;
+        font-size: 0.9em;
+    }
+}
+/* --- SCROLLBAR --- */
+::-webkit-scrollbar {
+    width: 8px;
+}
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
