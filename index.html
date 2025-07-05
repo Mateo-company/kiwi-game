@@ -1,35 +1,156 @@
-<!DOCTYPE html>
-<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Juego de Recoger Frutas</title>
+    <title>Kiwi Game</title>
+     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🥝</text></svg>">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
-    <div id="loading-screen" class="loading-screen">
-        <div class="spinner"></div>
-        <p>Cargando assets...</p>
+    <!-- Contenedor de notificación -->
+    <div id="game-notification">
+        <p id="game-notification-message"></p>
     </div>
-
-    <div id="game-container" class="game-container hidden">
-        <div class="game-hud">
-            <div class="score-display">PUNTOS: <span id="score">0</span></div>
-            <div class="lives-display">VIDAS: <span id="lives">3</span></div>
-            <div class="high-score-indicator hidden">MEJOR PUNT.: <span id="high-score">0</span></div>
+    
+    <div id="game-container">
+        <div id="loading-screen" class="screen">
+            <h1>Cargando Juego...</h1>
+            <p>Preparando las frutas y la canasta.</p>
         </div>
-
-        <div id="game-area">
-            <div id="basket"></div>
-            <button id="pause-button" class="game-button">PAUSA</button>
+        <div id="main-menu" class="screen hidden">
+            <h1>Kiwi Game</h1>
+            <button id="modes-button">Modos</button>
+            <button id="high-scores-button">Tus puntuaciones</button>
+            <button id="options-button">Opciones</button>
+            <button id="instructions-button">Instrucciones</button>
+            <button id="rate-game-button">Calificar Juego</button>
+            <button id="suggest-feature-button">Sugerir Característica</button>
         </div>
-
-        <div id="mobile-controls" class="game-controls">
-            <button id="mobile-left-button" class="mobile-button">&lt;</button>
-            <button id="mobile-right-button" class="mobile-button">&gt;</button>
+        <div id="modes-menu" class="screen hidden">
+            <h2>Selecciona un Modo</h2>
+            <button id="start-game-button">Modo Normal</button>
+            <button id="custom-mode-button-main">Modo Personalizado</button>
+            <button id="back-to-main-from-modes-button" class="back-button">Volver al Menú Principal</button>
         </div>
-
-        </div> <script src="script.js"></script>
+        <div id="game-screen" class="screen hidden">
+            <div id="game-area">
+                <div id="fruit-container"></div>
+                <img id="basket" src="" alt="Canasta">
+            </div>
+            <div class="hud">
+                <span id="score">PUNTOS: 0</span>
+                <span id="lives">VIDAS: 3</span>
+                <span id="high-score-indicator">MEJOR PUNT.: 0</span>
+                <button id="pause-button" class="game-control-button">⏸️</button>
+            </div>
+            <div class="mobile-controls">
+                <button id="mobile-left-button" class="mobile-button">🠸</button>
+                <button id="mobile-right-button" class="mobile-button">🠺</button>
+            </div>
+        </div>
+        <div id="options-menu" class="screen hidden">
+            <h2>Opciones del Juego</h2>
+            <p>Aquí irían opciones como sonido, etc. (no implementadas)</p>
+            <button id="back-to-main-from-options-button" class="back-button">Volver al Menú Principal</button>
+        </div>
+        <div id="custom-mode-menu" class="screen hidden">
+            <h2>Modo Personalizado</h2>
+            <div class="setting-item">
+                <label for="fruit-fall-speed">Velocidad de Caída de Frutas:</label>
+                <input type="range" id="fruit-fall-speed" min="1" max="10" step="0.5" value="3">
+                <span id="fruit-fall-speed-value">3.0</span>
+            </div>
+            <div class="setting-item">
+                <label for="fruit-spawn-rate">Frecuencia de Aparición (ms):</label>
+                <input type="range" id="fruit-spawn-rate" min="500" max="3000" step="100" value="1500">
+                <span id="fruit-spawn-rate-value">1500</span>
+            </div>
+            <div class="setting-item">
+                <label for="max-lives">Vidas Máximas:</label>
+                <input type="number" id="max-lives" min="1" max="10" value="3">
+                <span id="max-lives-value">3</span>
+            </div>
+            <div class="setting-item">
+                <label for="basket-size">Tamaño de la Canasta (px):</label>
+                <input type="range" id="basket-size" min="50" max="150" step="10" value="80">
+                <span id="basket-size-value">80</span>
+            </div>
+            <div class="setting-item">
+                <label for="good-bad-ratio">Proporción Buenas/Malas:</label>
+                <input type="range" id="good-bad-ratio" min="0.1" max="1" step="0.1" value="0.8">
+                <span id="good-bad-ratio-value">80% Buenas</span>
+            </div>
+            <button id="apply-custom-settings-button">Aplicar y Jugar</button>
+            <button id="back-to-modes-from-custom-button" class="back-button">Volver a Modos</button>
+        </div>
+        <div id="high-scores-menu" class="screen hidden">
+            <h2>Tus puntuaciones</h2>
+            <ol id="high-scores-list"></ol>
+            <button id="back-to-main-from-highscores-button" class="back-button">Volver al Menú Principal</button>
+        </div>
+        <div id="rating-menu" class="screen hidden">
+            <h2>Calificar Juego</h2>
+            <div class="stars-container">
+                <span class="star" data-value="1">⭐</span>
+                <span class="star" data-value="2">⭐</span>
+                <span class="star" data-value="3">⭐</span>
+                <span class="star" data-value="4">⭐</span>
+                <span class="star" data-value="5">⭐</span>
+            </div>
+            <p id="rating-message">Haz clic en una estrella para calificar.</p>
+            <button id="back-to-main-from-rating-button" class="back-button">Volver al Menú Principal</button>
+        </div>
+        <div id="suggestion-menu" class="screen hidden">
+            <h2>Sugerir Característica</h2>
+            <form id="suggestion-form" action="https://formspree.io/f/mgvyqwkk" method="POST">
+                <textarea id="suggestion-text" name="suggestion" maxlength="200" placeholder="Escribe tu sugerencia aquí (máx. 200 caracteres)" required></textarea>
+                <p id="char-count">200 caracteres restantes</p>
+                <button type="submit">Enviar Sugerencia</button>
+            </form>
+            <button id="back-to-main-from-suggestion-button" class="back-button">Volver al Menú Principal</button>
+        </div>
+        <div id="instructions-menu" class="screen hidden">
+            <h2>Instrucciones del Juego</h2>
+            <p>¡Atrapa las frutas buenas y evita las malas!</p>
+            <h3>Frutas Buenas (dan puntos):</h3>
+            <ul>
+                <li><img src="assets/images/apple.png" alt="Manzana"> Manzana (+10 Puntos)</li>
+                <li><img src="assets/images/orange.png" alt="Naranja"> Naranja (+15 Puntos)</li>
+                <li><img src="assets/images/cherry_berry.png" alt="Cereza"> Cereza (+20 Puntos)</li>
+                <li><img src="assets/images/kiwi-game.png" alt="Kiwi"> Kiwi (+25 Puntos)</li>
+            </ul>
+            <h3>Frutas Malas (restan vida y puntos):</h3>
+            <ul>
+                <li><img src="assets/images/apple-mala.png" alt="Manzana Podrida"> Manzana Podrida (-15 Puntos, -1 Vida)</li>
+            </ul>
+            <p><strong>Controles:</strong></p>
+            <ul>
+                <li><strong>PC:</strong> Teclas 'A' / 'D' o Flechas Izquierda / Derecha para mover la canasta.</li>
+                <li><strong>Móvil:</strong> Botones de flecha en pantalla.</li>
+            </ul>
+            <button id="back-to-main-from-instructions-button" class="back-button">Volver al Menú Principal</button>
+        </div>
+        <div id="game-over-screen" class="screen hidden">
+            <h2 id="gameOverMessage">GAME OVER</h2>
+            <p>Puntuación Final: <span id="final-score">0</span></p>
+            
+            <div id="custom-mode-message" class="hidden">
+                <p>¡Partida en modo personalizado! Las puntuaciones no se guardan.</p>
+            </div>
+            
+            <div id="save-score-section">
+                <input type="text" id="player-name" placeholder="Tu nombre (2-10 caracteres)" maxlength="10">
+                <p class="name-error">El nombre debe tener entre 2 y 10 caracteres</p>
+                <button id="save-score-button">Guardar Puntuación</button>
+            </div>
+            <button id="restart-game-button">Jugar de Nuevo</button>
+        </div>
+        <div id="pause-menu" class="screen hidden">
+            <h2>Juego en Pausa</h2>
+            <button id="resume-button">Continuar</button>
+            <button id="restart-from-pause-button">Reiniciar</button>
+            <button id="back-to-main-from-pause-button">Menú Principal</button>
+        </div>
+    </div>
+    <script src="script.js"></script>
 </body>
 </html>
